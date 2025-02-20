@@ -312,9 +312,9 @@ process_vcf <- function(i, filepath, files, filters, cons){
     colnames(vcf) <- c("CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO")
 
     # Convert the INFO column to ref and alt reads, filtering for low values
-    info <- vcf$INFO
-    info <- gsub(".*;DP4=", "", info)
-    counts <- sapply(info, strsplit, split = ",")
+    dp4 <- sub(".*DP4=", "", vcf$INFO)
+    dp4 <- sub(";.*","",dp4)
+    counts <- sapply(dp4, strsplit, split = ",")
     counts <- (matrix(as.numeric(unlist(counts)), ncol = 4, byrow = T))
     ref <- counts[,1] + counts[,2]
     ref[ref < filters$call] <- 0
@@ -323,6 +323,7 @@ process_vcf <- function(i, filepath, files, filters, cons){
 
     # DP4 category
     dp4 <- sub(".*DP4=", "", vcf$INFO)
+    dp4 <- sub(";.*","",dp4)
     dp4_pval <- sapply(dp4, fisher, USE.NAMES = F)
 
     # Strand bias
